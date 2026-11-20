@@ -8,10 +8,10 @@
  * НИКОГДА не вставляйте сюда service_role / secret key.
  */
 export const SUPABASE_URL: string =
-  import.meta.env.VITE_SUPABASE_URL ?? "https://YOUR-PROJECT.supabase.co";
+  import.meta.env.VITE_SUPABASE_URL ?? "https://qkjlxrjajdsvtfenyvmz.supabase.co";
 
 export const SUPABASE_ANON_KEY: string =
-  import.meta.env.VITE_SUPABASE_ANON_KEY ?? "YOUR-ANON-KEY";
+  import.meta.env.VITE_SUPABASE_ANON_KEY ?? "sb_publishable_AtVLIAd54SeHdwH7OfXuag_t62zek5m";
 
 /**
  * Email единственного администратора. Пользователь с этим email создаётся

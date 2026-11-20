@@ -139,6 +139,21 @@ begin
 end;
 $$;
 
+-- ── 4b. Права доступа к API ─────────────────────────────────────────
+-- Нужны, если при создании проекта не включена опция
+-- «Grant API access to new tables automatically». Доступ всё равно ограничен RLS.
+grant usage on schema public to anon, authenticated;
+
+grant select on public.members, public.statute_chapters, public.news_posts to anon, authenticated;
+grant insert, update, delete on public.members, public.statute_chapters, public.news_posts to authenticated;
+
+grant insert on public.join_applications to anon;
+grant select, insert, update, delete on public.join_applications to authenticated;
+
+grant execute on function public.reorder_members(bigint[]) to authenticated;
+grant execute on function public.reorder_chapters(bigint[]) to authenticated;
+grant execute on function public.accept_application(bigint, text) to authenticated;
+
 -- ── 5. Начальное наполнение ─────────────────────────────────────────
 
 -- ── Стартовые данные (вставляются только в пустые таблицы) ─────────────
