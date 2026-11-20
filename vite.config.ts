@@ -1,28 +1,26 @@
-import devServer from "@hono/vite-dev-server"
 import path from "path"
-const __dirname = import.meta.dirname
 import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 
+const __dirname = import.meta.dirname
+
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [
-    devServer({ entry: "api/boot.ts", exclude: [/^\/(?!api\/).*$/] }),
-    react()],
+export default defineConfig(({ command }) => ({
+  // На GitHub Pages сайт открывается по адресу https://<логин>.github.io/ERP-Political/
+  // Если переименуете репозиторий или подключите свой домен — поменяйте это значение.
+  base: command === "build" ? (process.env.VITE_BASE ?? "/ERP-Political/") : "/",
+  plugins: [react()],
   server: {
     port: 3000,
   },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "@contracts": path.resolve(__dirname, "./contracts"),
-      "@db": path.resolve(__dirname, "./db"),
-      "db": path.resolve(__dirname, "./db"),
     },
   },
   envDir: path.resolve(__dirname),
   build: {
-    outDir: path.resolve(__dirname, "dist/public"),
+    outDir: path.resolve(__dirname, "dist"),
     emptyOutDir: true,
   },
-});
+}))

@@ -1,6 +1,12 @@
 import { useState, type FormEvent } from "react";
-import { trpc } from "@/providers/trpc";
-import { DEFAULT_MEMBER_ROLE } from "@contracts/constants";
+import {
+  useMembersList,
+  useCreateMember,
+  useUpdateMember,
+  useDeleteMember,
+  useReorderMembers,
+} from "@/lib/api";
+import { DEFAULT_MEMBER_ROLE } from "@/lib/constants";
 import {
   field,
   labelCls,
@@ -20,46 +26,32 @@ export default function MembersAdmin() {
   const [editRole, setEditRole] = useState("");
   const [feedback, setFeedback] = useState<Feedback>(null);
 
-  const utils = trpc.useUtils();
-  const { data: members, isLoading, isError } = trpc.members.list.useQuery();
+  const { data: members, isLoading, isError } = useMembersList();
   const list = members ?? [];
 
-  const refresh = () => utils.members.list.invalidate();
   const onError = (err: { message: string }) =>
     setFeedback({ ok: false, text: err.message || "Не удалось выполнить действие." });
 
-  const create = trpc.members.create.useMutation({
-    onSuccess: async () => {
-      await refresh();
+  const create = useCreateMember({
+    onSuccess: () => {
       setName("");
       setRole("");
       setFeedback({ ok: true, text: "Член партии добавлен." });
     },
     onError,
   });
-  const update = trpc.members.update.useMutation({
-    onSuccess: async () => {
-      await refresh();
+  const update = useUpdateMember({
+    onSuccess: () => {
       setEditingId(null);
       setFeedback({ ok: true, text: "Изменения сохранены." });
     },
     onError,
   });
-  const remove = trpc.members.delete.useMutation({
-    onSuccess: async () => {
-      await refresh();
-      setFeedback({ ok: true, text: "Член партии удалён из списка." });
-    },
+  const remove = useDeleteMember({
+    onSuccess: () => setFeedback({ ok: true, text: "Член партии удалён из списка." }),
     onError,
   });
-  const reorder = trpc.members.reorder.useMutation({ onSuccess: refresh, onError });
-  const seed = trpc.members.seedDefaults.useMutation({
-    onSuccess: async () => {
-      await refresh();
-      setFeedback({ ok: true, text: "Стартовый список загружен." });
-    },
-    onError,
-  });
+  const reorder = useReorderMembers({ onError });
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -159,17 +151,7 @@ export default function MembersAdmin() {
         {isLoading && <p className="mt-4 text-paper-dim">Загрузка…</p>}
         {isError && <p className="mt-4 text-red-400">Не удалось загрузить список. Обновите страницу.</p>}
         {members && list.length === 0 && (
-          <div>
-            <Empty>Список пуст. Можно загрузить стартовый состав или добавить людей вручную.</Empty>
-            <button
-              type="button"
-              onClick={() => seed.mutate()}
-              disabled={seed.isPending}
-              className={`${smallBtn} mt-4`}
-            >
-              {seed.isPending ? "Загрузка…" : "Загрузить стартовый список"}
-            </button>
-          </div>
+          <Empty>Список пуст. Добавьте первого члена партии в форме слева.</Empty>
         )}
         <ul className="mt-4 space-y-3">
           {list.map((m, i) => {

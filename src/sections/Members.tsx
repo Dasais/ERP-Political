@@ -1,8 +1,8 @@
-import { trpc } from "@/providers/trpc";
+import { useMembersList } from "@/lib/api";
 import { HQ_ADDRESS } from "@/lib/content";
 
 export default function Members() {
-  const { data: members, isLoading, isError } = trpc.members.list.useQuery();
+  const { data: members, isLoading, isError } = useMembersList();
   const list = members ?? [];
 
   return (

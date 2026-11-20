@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { trpc } from "@/providers/trpc";
+import { useStatuteList } from "@/lib/api";
 
 const toParagraphs = (body: string) =>
   body
@@ -9,7 +9,7 @@ const toParagraphs = (body: string) =>
 
 export default function Statute() {
   const [open, setOpen] = useState<number>(0);
-  const { data: chapters, isLoading, isError } = trpc.statute.list.useQuery();
+  const { data: chapters, isLoading, isError } = useStatuteList();
 
   return (
     <section id="statute" className="relative py-24 sm:py-32">

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { trpc } from "@/providers/trpc";
+import { useNewsList, useCreateNews, useUpdateNews, useDeleteNews } from "@/lib/api";
 import { NEWS_CATEGORY_LABELS } from "@/lib/content";
 import { field, labelCls, smallBtn, dangerBtn, formatDate, FeedbackLine, type Feedback } from "./shared";
 
@@ -12,8 +12,7 @@ export default function NewsAdmin() {
   const [body, setBody] = useState("");
   const [feedback, setFeedback] = useState<Feedback>(null);
 
-  const utils = trpc.useUtils();
-  const { data: posts, isLoading } = trpc.news.list.useQuery();
+  const { data: posts, isLoading } = useNewsList();
 
   const reset = () => {
     setEditingId(null);
@@ -25,25 +24,22 @@ export default function NewsAdmin() {
   const onError = (err: { message: string }) =>
     setFeedback({ ok: false, text: err.message || "Не удалось сохранить. Проверьте поля." });
 
-  const create = trpc.news.create.useMutation({
-    onSuccess: async () => {
-      await utils.news.list.invalidate();
+  const create = useCreateNews({
+    onSuccess: () => {
       reset();
       setFeedback({ ok: true, text: "Публикация добавлена в ленту новостей." });
     },
     onError,
   });
-  const update = trpc.news.update.useMutation({
-    onSuccess: async () => {
-      await utils.news.list.invalidate();
+  const update = useUpdateNews({
+    onSuccess: () => {
       reset();
       setFeedback({ ok: true, text: "Изменения сохранены." });
     },
     onError,
   });
-  const remove = trpc.news.delete.useMutation({
-    onSuccess: async (_d, vars) => {
-      await utils.news.list.invalidate();
+  const remove = useDeleteNews({
+    onSuccess: (_d, vars) => {
       if (editingId === vars.id) reset();
       setFeedback({ ok: true, text: "Публикация удалена." });
     },

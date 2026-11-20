@@ -1,3 +1,4 @@
+import { asset } from "@/lib/asset";
 import { useParallax } from "@/hooks/useParallax";
 import { PROGRAM_CARDS, type ProgramCard } from "@/lib/content";
 
@@ -55,7 +56,7 @@ export default function Program() {
       <div
         ref={bgRef}
         className="absolute inset-[-8%] bg-cover bg-center will-change-transform"
-        style={{ backgroundImage: "url(/assets/program-bg.jpg)" }}
+        style={{ backgroundImage: `url(${asset("assets/program-bg.jpg")})` }}
         aria-hidden="true"
       />
       <div className="absolute inset-0 bg-ink-950/85" aria-hidden="true" />

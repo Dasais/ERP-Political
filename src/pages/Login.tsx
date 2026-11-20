@@ -1,11 +1,14 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router";
-import { trpc } from "@/providers/trpc";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { ADMIN_EMAIL } from "@/config";
+import { asset } from "@/lib/asset";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Login() {
   const navigate = useNavigate();
-  const utils = trpc.useUtils();
+  const qc = useQueryClient();
   const { isAuthenticated, isLoading } = useAuth();
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -15,12 +18,28 @@ export default function Login() {
     if (!isLoading && isAuthenticated) navigate("/admin", { replace: true });
   }, [isLoading, isAuthenticated, navigate]);
 
-  const login = trpc.auth.login.useMutation({
-    onSuccess: async () => {
-      await utils.auth.me.invalidate();
+  const login = useMutation({
+    mutationFn: async (pwd: string) => {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: ADMIN_EMAIL,
+        password: pwd,
+      });
+      if (error) {
+        if (/invalid login credentials/i.test(error.message)) throw new Error("Неверный пароль");
+        if (/rate limit|too many/i.test(error.message))
+          throw new Error("Слишком много попыток. Подождите несколько минут.");
+        if (/failed to fetch|network/i.test(error.message))
+          throw new Error("Нет соединения с сервером. Проверьте интернет.");
+        throw new Error(error.message);
+      }
+      return data.session;
+    },
+    onSuccess: async (session) => {
+      qc.setQueryData(["session"], session);
+      await qc.invalidateQueries({ queryKey: ["is-admin"] });
       navigate("/admin", { replace: true });
     },
-    onError: (err) => setError(err.message || "Не удалось войти. Попробуйте ещё раз."),
+    onError: (err: Error) => setError(err.message),
   });
 
   const submit = (e: FormEvent) => {
@@ -30,17 +49,23 @@ export default function Login() {
       setError("Введите пароль.");
       return;
     }
-    login.mutate({ password });
+    login.mutate(password);
   };
 
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-ink-950 px-4 py-10 text-paper">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <img src="/assets/logo.png" alt="Эмблема партии ERP" className="mx-auto h-16 w-auto object-contain" />
+          <img src={asset("assets/logo.png")} alt="Эмблема партии ERP" className="mx-auto h-16 w-auto object-contain" />
           <h1 className="mt-5 font-display text-3xl font-bold text-gold-300">Вход в панель</h1>
           <p className="mt-2 text-sm text-paper-dim">Доступ только для Высшего Совета</p>
         </div>
+
+        {!isSupabaseConfigured && (
+          <p className="mb-4 border border-red-400/40 p-3 text-sm text-red-300" role="alert">
+            Не заполнены настройки Supabase в файле src/config.ts — вход невозможен.
+          </p>
+        )}
 
         <form onSubmit={submit} className="gold-frame bg-ink-900 p-6 sm:p-7">
           <label htmlFor="login-password" className="mb-2 block text-sm font-semibold text-paper/90">

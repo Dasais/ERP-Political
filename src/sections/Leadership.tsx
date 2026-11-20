@@ -1,3 +1,4 @@
+import { asset } from "@/lib/asset";
 type Leader = {
   photo: string;
   role: string;
@@ -8,7 +9,7 @@ type Leader = {
 
 const LEADERS: Leader[] = [
   {
-    photo: "/assets/chairman.jpg",
+    photo: asset("assets/chairman.jpg"),
     role: "Председатель партии",
     name: "Хойт Хантсингер",
     quote:
@@ -16,7 +17,7 @@ const LEADERS: Leader[] = [
     alt: "Портрет Председателя партии Хойта Хантсингера",
   },
   {
-    photo: "/assets/deputy.jpg",
+    photo: asset("assets/deputy.jpg"),
     role: "Заместитель Председателя партии",
     name: "Мануэль Кастельяно",
     quote: "Сила общества — в единстве и прямом контроле над властью.",

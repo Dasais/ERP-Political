@@ -1,6 +1,6 @@
+import { asset } from "@/lib/asset";
 import { useState } from "react";
 import { Link } from "react-router";
-import { trpc } from "@/providers/trpc";
 import { useAuth } from "@/hooks/useAuth";
 import NewsAdmin from "./admin/NewsAdmin";
 import MembersAdmin from "./admin/MembersAdmin";
@@ -57,7 +57,7 @@ export default function Admin() {
       <div className="mx-auto max-w-5xl">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <img src="/assets/logo.png" alt="Эмблема партии ERP" className="h-12 w-auto object-contain" />
+            <img src={asset("assets/logo.png")} alt="Эмблема партии ERP" className="h-12 w-auto object-contain" />
             <div>
               <h1 className="font-display text-2xl font-bold text-gold-300">Панель управления</h1>
               <p className="text-xs uppercase tracking-[0.2em] text-paper-dim">

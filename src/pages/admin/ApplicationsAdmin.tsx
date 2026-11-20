@@ -1,30 +1,27 @@
 import { useState } from "react";
-import { trpc } from "@/providers/trpc";
-import { DEFAULT_MEMBER_ROLE } from "@contracts/constants";
+import {
+  useApplicationsList,
+  useSetApplicationStatus,
+  useDeleteApplication,
+  useAcceptApplication,
+} from "@/lib/api";
+import { DEFAULT_MEMBER_ROLE } from "@/lib/constants";
 import { smallBtn, dangerBtn, formatDate, FeedbackLine, type Feedback } from "./shared";
 
 export default function ApplicationsAdmin() {
   const [feedback, setFeedback] = useState<Feedback>(null);
-  const utils = trpc.useUtils();
-  const { data, isLoading, isError } = trpc.applications.list.useQuery();
+  const { data, isLoading, isError } = useApplicationsList();
 
-  const refresh = () => utils.applications.list.invalidate();
   const onError = (err: { message: string }) =>
     setFeedback({ ok: false, text: err.message || "Не удалось выполнить действие." });
 
-  const setStatus = trpc.applications.setStatus.useMutation({ onSuccess: refresh, onError });
-  const remove = trpc.applications.delete.useMutation({
-    onSuccess: async () => {
-      await refresh();
-      setFeedback({ ok: true, text: "Заявка удалена." });
-    },
+  const setStatus = useSetApplicationStatus({ onError });
+  const remove = useDeleteApplication({
+    onSuccess: () => setFeedback({ ok: true, text: "Заявка удалена." }),
     onError,
   });
-  const accept = trpc.applications.accept.useMutation({
-    onSuccess: async () => {
-      await Promise.all([refresh(), utils.members.list.invalidate()]);
-      setFeedback({ ok: true, text: "Заявитель принят и добавлен в список членов партии." });
-    },
+  const accept = useAcceptApplication({
+    onSuccess: () => setFeedback({ ok: true, text: "Заявитель принят и добавлен в список членов партии." }),
     onError,
   });
 

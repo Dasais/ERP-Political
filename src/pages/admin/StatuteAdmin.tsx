@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { trpc } from "@/providers/trpc";
+import {
+  useStatuteList,
+  useCreateChapter,
+  useUpdateChapter,
+  useDeleteChapter,
+  useReorderChapters,
+} from "@/lib/api";
 import {
   field,
   labelCls,
@@ -79,45 +85,31 @@ export default function StatuteAdmin() {
   const [adding, setAdding] = useState(false);
   const [feedback, setFeedback] = useState<Feedback>(null);
 
-  const utils = trpc.useUtils();
-  const { data: chapters, isLoading, isError } = trpc.statute.list.useQuery();
+  const { data: chapters, isLoading, isError } = useStatuteList();
   const list = chapters ?? [];
 
-  const refresh = () => utils.statute.list.invalidate();
   const onError = (err: { message: string }) =>
     setFeedback({ ok: false, text: err.message || "Не удалось выполнить действие." });
 
-  const create = trpc.statute.create.useMutation({
-    onSuccess: async () => {
-      await refresh();
+  const create = useCreateChapter({
+    onSuccess: () => {
       setAdding(false);
       setFeedback({ ok: true, text: "Глава добавлена в конец Устава." });
     },
     onError,
   });
-  const update = trpc.statute.update.useMutation({
-    onSuccess: async () => {
-      await refresh();
+  const update = useUpdateChapter({
+    onSuccess: () => {
       setEditingId(null);
       setFeedback({ ok: true, text: "Глава сохранена." });
     },
     onError,
   });
-  const remove = trpc.statute.delete.useMutation({
-    onSuccess: async () => {
-      await refresh();
-      setFeedback({ ok: true, text: "Глава удалена." });
-    },
+  const remove = useDeleteChapter({
+    onSuccess: () => setFeedback({ ok: true, text: "Глава удалена." }),
     onError,
   });
-  const reorder = trpc.statute.reorder.useMutation({ onSuccess: refresh, onError });
-  const seed = trpc.statute.seedDefaults.useMutation({
-    onSuccess: async () => {
-      await refresh();
-      setFeedback({ ok: true, text: "Стандартный текст Устава загружен." });
-    },
-    onError,
-  });
+  const reorder = useReorderChapters({ onError });
 
   const move = (index: number, dir: -1 | 1) => {
     const next = moveId(list.map((c) => c.id), index, dir);
@@ -167,17 +159,7 @@ export default function StatuteAdmin() {
       {isLoading && <p className="mt-4 text-paper-dim">Загрузка…</p>}
       {isError && <p className="mt-4 text-red-400">Не удалось загрузить Устав. Обновите страницу.</p>}
       {chapters && list.length === 0 && !adding && (
-        <div>
-          <Empty>Устав пуст. Можно загрузить стандартный текст или добавить главы вручную.</Empty>
-          <button
-            type="button"
-            onClick={() => seed.mutate()}
-            disabled={seed.isPending}
-            className={`${smallBtn} mt-4`}
-          >
-            {seed.isPending ? "Загрузка…" : "Загрузить стандартный текст"}
-          </button>
-        </div>
+        <Empty>Устав пуст. Нажмите «Добавить главу», чтобы начать.</Empty>
       )}
 
       <ul className="mt-4 space-y-3">

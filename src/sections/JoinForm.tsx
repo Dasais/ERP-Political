@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { trpc } from "@/providers/trpc";
+import { useSubmitApplication } from "@/lib/api";
 
 type FieldErrors = {
   fullName?: string;
@@ -13,10 +13,11 @@ export default function JoinForm() {
   const [age, setAge] = useState("");
   const [contact, setContact] = useState("");
   const [noOtherParty, setNoOtherParty] = useState(false);
+  const [website, setWebsite] = useState(""); // ловушка для ботов
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitted, setSubmitted] = useState(false);
 
-  const mutation = trpc.applications.submit.useMutation({
+  const mutation = useSubmitApplication({
     onSuccess: () => setSubmitted(true),
     onError: () => {
       setErrors({ contact: "Не удалось отправить заявку. Попробуйте позже." });
@@ -39,6 +40,11 @@ export default function JoinForm() {
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
+    if (website) {
+      // скрытое поле заполнил бот — делаем вид, что всё принято
+      setSubmitted(true);
+      return;
+    }
     const next = validate();
     setErrors(next);
     if (Object.values(next).some(Boolean)) return;
@@ -46,7 +52,6 @@ export default function JoinForm() {
       fullName: fullName.trim(),
       age: Number(age),
       contact: contact.trim(),
-      noOtherParty: true,
     });
   };
 
@@ -117,7 +122,7 @@ export default function JoinForm() {
                 </button>
               </div>
             ) : (
-              <form onSubmit={onSubmit} noValidate className="gold-frame bg-ink-900 p-7 sm:p-9">
+              <form onSubmit={onSubmit} noValidate className="gold-frame relative overflow-hidden bg-ink-900 p-7 sm:p-9">
                 <h3 className="font-display text-2xl font-bold text-paper">Заявка на вступление</h3>
 
                 <div className="mt-7 space-y-5">
@@ -191,6 +196,17 @@ export default function JoinForm() {
                     {errors.noOtherParty && <p className="mt-2 text-sm text-red-400">{errors.noOtherParty}</p>}
                   </div>
                 </div>
+
+                <input
+                  type="text"
+                  name="website"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  className="absolute -left-[9999px] h-0 w-0 opacity-0"
+                />
 
                 <button
                   type="submit"

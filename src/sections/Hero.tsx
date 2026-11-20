@@ -1,3 +1,4 @@
+import { asset } from "@/lib/asset";
 import { useParallax } from "@/hooks/useParallax";
 import { scrollToSection } from "@/lib/smooth-scroll";
 
@@ -10,7 +11,7 @@ export default function Hero() {
       <div
         ref={bgRef}
         className="absolute inset-[-8%] bg-cover bg-center will-change-transform"
-        style={{ backgroundImage: "url(/assets/hero-bg.jpg)" }}
+        style={{ backgroundImage: `url(${asset("assets/hero-bg.jpg")})` }}
         aria-hidden="true"
       />
       {/* Затемнение для читаемости */}
@@ -25,7 +26,7 @@ export default function Hero() {
 
       <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center px-4 pb-24 pt-28 text-center sm:px-6">
         <img
-          src="/assets/logo.png"
+          src={asset("assets/logo.png")}
           alt="Эмблема Партии Равных Прав: золотой факел и весы правосудия"
           className="logo-glow reveal is-visible h-36 w-auto object-contain sm:h-44"
         />

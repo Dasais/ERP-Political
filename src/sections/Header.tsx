@@ -1,3 +1,4 @@
+import { asset } from "@/lib/asset";
 import { useEffect, useState } from "react";
 import { NAV_ITEMS } from "@/lib/content";
 import { scrollToSection } from "@/lib/smooth-scroll";
@@ -48,7 +49,7 @@ export default function Header() {
             aria-label="Партия Равных Прав — на главную"
           >
             <img
-              src="/assets/logo.png"
+              src={asset("assets/logo.png")}
               alt="Эмблема партии ERP — факел и весы правосудия"
               className="h-11 w-auto object-contain"
             />

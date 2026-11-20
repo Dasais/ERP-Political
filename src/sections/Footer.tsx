@@ -1,3 +1,4 @@
+import { asset } from "@/lib/asset";
 import { Link } from "react-router";
 import { NAV_ITEMS, HQ_ADDRESS } from "@/lib/content";
 import { scrollToSection } from "@/lib/smooth-scroll";
@@ -10,7 +11,7 @@ export default function Footer() {
           <div>
             <div className="flex items-center gap-4">
               <img
-                src="/assets/logo.png"
+                src={asset("assets/logo.png")}
                 alt="Эмблема партии ERP — факел и весы правосудия"
                 className="h-16 w-auto object-contain"
               />

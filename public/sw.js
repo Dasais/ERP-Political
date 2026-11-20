@@ -1,11 +1,13 @@
 /* Service Worker: network-first для HTML/навигации, cache-first для статики */
-const STATIC_CACHE = "erp-static-v2";
+const STATIC_CACHE = "erp-static-v3";
+// Сайт может лежать в подпапке (GitHub Pages: /ERP-Political/) — берём путь из области действия воркера
+const BASE = new URL(self.registration.scope).pathname;
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) =>
-      cache.addAll(["/assets/logo.jpg", "/assets/hero-bg.jpg", "/assets/program-bg.jpg", "/assets/chairman.jpg", "/assets/deputy.jpg"]),
+      cache.addAll(["assets/logo.jpg", "assets/hero-bg.jpg", "assets/program-bg.jpg", "assets/chairman.jpg", "assets/deputy.jpg"].map((f) => BASE + f)),
     ),
   );
 });

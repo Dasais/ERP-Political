@@ -1,4 +1,4 @@
-import { trpc } from "@/providers/trpc";
+import { useNewsList } from "@/lib/api";
 import { NEWS_CATEGORY_LABELS } from "@/lib/content";
 
 const CATEGORY_STYLES: Record<string, string> = {
@@ -16,7 +16,7 @@ function formatDate(d: Date) {
 }
 
 export default function News() {
-  const { data, isLoading, isError, refetch, isFetching } = trpc.news.list.useQuery();
+  const { data, isLoading, isError, refetch, isFetching } = useNewsList();
 
   return (
     <section id="news" className="relative py-24 sm:py-32">

@@ -1,73 +1,76 @@
-# React + TypeScript + Vite
+# Партия Равных Прав — сайт
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Статический сайт (React + Vite), который работает на **GitHub Pages**.
+Данные (состав, Устав, новости, заявки) и вход в админ-панель — в **Supabase**.
 
-Currently, two official plugins are available:
+Сайт: `https://<ваш-логин>.github.io/ERP-Political/`
+Админ-панель: `https://<ваш-логин>.github.io/ERP-Political/login`
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## Настройка (один раз)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 1. Supabase: создать администратора
+1. Откройте проект в [supabase.com](https://supabase.com) → **Authentication → Users**.
+2. **Add user → Create new user**.
+   - Email: `admin@erp-party.com` (можно другой, но тогда поменяйте его ещё в двух местах — см. ниже)
+   - Password: ваш пароль для входа в панель
+   - Включите **Auto Confirm User**.
+3. **Authentication → Sign In / Providers** (или Settings): выключите **Allow new users to sign up**.
 
-## Expanding the ESLint configuration
+### 2. Supabase: создать таблицы
+1. **SQL Editor → New query**.
+2. Вставьте весь файл `supabase/setup.sql` и нажмите **Run**.
+3. В конце должна вернуться одна строка с вашим email. Если пусто — вы не создали пользователя
+   (шаг 1) или email не совпадает: исправьте и запустите скрипт ещё раз (он безопасен при повторе).
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Скрипт создаёт таблицы, правила доступа (RLS) и загружает текущий состав, Устав и новости.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 3. Подключить сайт к Supabase
+В Supabase: **Project Settings → API**. Скопируйте:
+- **Project URL**
+- **anon / publishable key** (публичный ключ)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Вставьте их в файл `src/config.ts` (`SUPABASE_URL` и `SUPABASE_ANON_KEY`).
+Эти значения публичные, их можно хранить в репозитории. **Никогда не вставляйте** `service_role` / `secret` ключ.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Если использовали другой email администратора — поменяйте `ADMIN_EMAIL` в `src/config.ts`
+и `where email = '...'` в конце `supabase/setup.sql`.
+
+### 4. GitHub Pages
+1. Загрузите все файлы проекта в репозиторий (ветка `main`), **включая папку `.github`**.
+2. Репозиторий → **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+3. Вкладка **Actions**: дождитесь зелёной галочки у «Deploy to GitHub Pages» (1–2 минуты).
+
+Каждый следующий `push` в `main` публикует сайт автоматически.
+
+> Если репозиторий называется не `ERP-Political`, измените `base` в `vite.config.ts`.
+
+---
+
+## Как менять данные
+Откройте `/login`, введите пароль. В панели: **Новости, Состав, Устав, Заявки**.
+Изменения сразу видны на сайте, пересобирать ничего не нужно.
+
+## Смена пароля администратора
+Supabase → SQL Editor:
+
+```sql
+update auth.users
+set encrypted_password = extensions.crypt('НОВЫЙ_ПАРОЛЬ', extensions.gen_salt('bf'))
+where email = 'admin@erp-party.com';
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Локальный запуск
 ```
+npm install
+npm run dev
+```
+Откройте http://localhost:3000/. Значения Supabase берутся из `src/config.ts`
+или из файла `.env` (образец — `.env.example`).
+
+## Безопасность
+- Читать Состав, Устав и Новости может любой посетитель, менять — только администратор (правила RLS в БД).
+- Заявки на вступление любой может отправить, но читать, менять и удалять их может только администратор.
+- Даже если кто-то зарегистрируется в Supabase Auth, прав на изменения у него не будет: они выдаются
+  только пользователям из таблицы `admins`.
