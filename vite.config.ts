@@ -6,9 +6,9 @@ const __dirname = import.meta.dirname
 
 // https://vite.dev/config/
 export default defineConfig(({ command }) => ({
-  // На GitHub Pages сайт открывается по адресу https://<логин>.github.io/ERP-Political/
-  // Если переименуете репозиторий или подключите свой домен — поменяйте это значение.
-  base: command === "build" ? (process.env.VITE_BASE ?? "/ERP-Political/") : "/",
+  // Сайт открывается на своём домене (erp-california-party.website), то есть из корня.
+  // Если вернётесь на адрес вида https://<логин>.github.io/ERP-Political/ — поставьте "/ERP-Political/".
+  base: process.env.VITE_BASE ?? "/",
   plugins: [react()],
   server: {
     port: 3000,
