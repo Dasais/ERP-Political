@@ -116,6 +116,10 @@ export default function NewsAdmin() {
               placeholder="Текст публикации…"
               className={`${field} min-h-[140px] resize-y py-3`}
             />
+            <p className="mt-2 text-xs text-paper-dim">
+              Переносы строк сохраняются. Для списков начинайте строки с «•». На сайте длинный
+              текст сворачивается, читатель раскрывает его кнопкой «Читать полностью».
+            </p>
           </div>
         </div>
         <FeedbackLine feedback={feedback} />

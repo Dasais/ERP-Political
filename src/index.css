@@ -216,6 +216,43 @@
       0 10px 42px -8px oklch(0.66 0.11 73 / 0.4);
   }
 
+  /* Золотой прожектор под курсором */
+  .spotlight {
+    position: relative;
+    isolation: isolate;
+  }
+  .spotlight::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    background: radial-gradient(
+      340px circle at var(--mx, 50%) var(--my, 50%),
+      oklch(0.735 0.11 76 / 0.14),
+      transparent 70%
+    );
+  }
+  .spotlight:hover::before {
+    opacity: 1;
+  }
+
+  /* Значок «Новое» с мягкой пульсацией */
+  @keyframes news-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 oklch(0.735 0.11 76 / 0.55);
+    }
+    50% {
+      box-shadow: 0 0 0 5px oklch(0.735 0.11 76 / 0);
+    }
+  }
+  .news-new {
+    animation: news-pulse 2.4s ease-out infinite;
+  }
+
   /* Индикатор прокрутки в Hero */
   @keyframes scroll-cue {
     0% {
@@ -262,6 +299,7 @@
   }
   .btn-gold::after,
   .scroll-cue-line,
+  .news-new,
   .logo-glow {
     animation: none;
   }

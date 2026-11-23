@@ -32,3 +32,11 @@ export function scrollToSection(id: string) {
     el.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 }
+
+export function scrollToTop() {
+  if (lenis) {
+    lenis.scrollTo(0, { duration: 1.4 });
+  } else {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+}

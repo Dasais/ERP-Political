@@ -1,6 +1,7 @@
 import { asset } from "@/lib/asset";
 import { useParallax } from "@/hooks/useParallax";
 import { scrollToSection } from "@/lib/smooth-scroll";
+import Embers from "@/components/Embers";
 
 export default function Hero() {
   const bgRef = useParallax<HTMLDivElement>(0.22);
@@ -23,6 +24,7 @@ export default function Hero() {
         }}
         aria-hidden="true"
       />
+      <Embers />
 
       <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center px-4 pb-24 pt-28 text-center sm:px-6">
         <img

@@ -1,9 +1,31 @@
+import { useState } from "react";
 import { useMembersList } from "@/lib/api";
 import { HQ_ADDRESS } from "@/lib/content";
 
 export default function Members() {
   const { data: members, isLoading, isError } = useMembersList();
   const list = members ?? [];
+  const [copied, setCopied] = useState(false);
+
+  const copyAddress = async () => {
+    const text = `${HQ_ADDRESS.region}, ${HQ_ADDRESS.street}`;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+      } catch {
+        /* копирование недоступно */
+      }
+      document.body.removeChild(ta);
+    }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2200);
+  };
 
   return (
     <section id="members" className="relative py-24 sm:py-32">
@@ -21,7 +43,7 @@ export default function Members() {
 
         <div className="mt-14 grid gap-6 lg:grid-cols-[5fr_7fr] lg:gap-8">
           {/* Штаб-квартира */}
-          <div className="gold-frame reveal bg-ink-900 p-8 sm:p-10">
+          <div className="gold-frame spotlight reveal bg-ink-900 p-8 sm:p-10">
             <p className="kicker">Штаб-квартира Высшего Совета</p>
             <address className="mt-6 space-y-1 not-italic">
               <p className="font-display text-2xl font-bold leading-snug text-paper sm:text-[1.65rem]">
@@ -31,6 +53,28 @@ export default function Members() {
                 {HQ_ADDRESS.street}
               </p>
             </address>
+            <button
+              type="button"
+              onClick={copyAddress}
+              className="mt-5 flex min-h-[40px] items-center gap-2 border border-gold-500/30 px-4 text-sm font-semibold text-gold-300 transition-colors hover:border-gold-400"
+            >
+              {copied ? (
+                <>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="m5 12 5 5 9-10" />
+                  </svg>
+                  Адрес скопирован
+                </>
+              ) : (
+                <>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <rect x="9" y="9" width="11" height="11" rx="1.5" />
+                    <path d="M5 15V5.5A1.5 1.5 0 0 1 6.5 4H16" />
+                  </svg>
+                  Скопировать адрес
+                </>
+              )}
+            </button>
             <div className="hairline my-7" />
             <ul className="space-y-3 text-[15px] leading-relaxed text-paper/75 sm:text-base">
               <li className="flex gap-3">
